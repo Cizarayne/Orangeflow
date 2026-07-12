@@ -6,11 +6,10 @@ const sendTokenResponse = (userId, email, res) => {
   });
 
   if (res && typeof res.cookie === "function") {
-    res.cookie("token", token, {
+    res.clearCookie("token", {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite:"none",
-      expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
     });
   }
   return token;
