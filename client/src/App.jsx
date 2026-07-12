@@ -34,12 +34,8 @@ import Aviation from "./components/categories/Aviation";
 import TravelAndTourism from "./components/categories/TravelAndTourism";
 import History from "./components/categories/History";
 
-
-
-
 import { AuthContext } from "./store/Auth";
 import Loader from "./components/ui/Loader";
-
 
 export default function App() {
   const { profile } = AuthContext();
@@ -48,11 +44,10 @@ export default function App() {
   useEffect(() => {
     const restoreSession = async () => {
       try {
-        await profile(); // restores user + isLoggedIn if the cookie is still valid
+        await profile();
       } catch (error) {
         console.log("profile error", error);
         toast.error("Session expired, please login again");
-        // No valid session — that's fine, just stay logged out
       } finally {
         setCheckingAuth(false);
       }
@@ -70,7 +65,6 @@ export default function App() {
 
   return (
     <div>
-      
       <Navbar />
 
       <Routes>
@@ -100,24 +94,133 @@ export default function App() {
         />
         <Route
           path="/explore/history"
-          element={<ProtectedRoute><History /></ProtectedRoute>}
+          element={
+            <ProtectedRoute>
+              <History />
+            </ProtectedRoute>
+          }
         />
         <Route path="/reset-password/:token" element={<ResetPassword />} />
-        <Route path="/explore/travel-&-tourism" element={<ProtectedRoute><TravelAndTourism /></ProtectedRoute>} />
-        <Route path="/change-password"element={<ProtectedRoute><ChangePassword /></ProtectedRoute>}/>
-        <Route path="/edit-profile" element={<ProtectedRoute><EditProfile /></ProtectedRoute>} />
-        <Route path="/explore/countries" element={<ProtectedRoute><Countries /></ProtectedRoute>} />
-        <Route path="/explore/wildlife" element={<ProtectedRoute><Wildlife /></ProtectedRoute>} />
-        <Route path="/explore/fashion" element={<ProtectedRoute><Fashion /></ProtectedRoute>} />
-        <Route path="/explore/automobile" element={<ProtectedRoute><AutoMobile /></ProtectedRoute>} />
-        <Route path="/explore/education" element={<ProtectedRoute><Education /></ProtectedRoute>} />
-        <Route path="/explore/food-&-cuisine" element={<ProtectedRoute><FoodAndCuisine /></ProtectedRoute>} />
-        <Route path="/explore/science-&-research" element={<ProtectedRoute><ScienceAndResearch /></ProtectedRoute>} />
-        <Route path="/explore/healthcare" element={<ProtectedRoute><Healthcare /></ProtectedRoute>} />
-        <Route path="/explore/artificial-intelligence" element={<ProtectedRoute><ArtificialIntelligence /></ProtectedRoute>} />
-        <Route path="/explore/space-&-astronomy" element={<ProtectedRoute><SpaceAndAstronomy /></ProtectedRoute>} />
-        <Route path="/explore/aviation" element={<ProtectedRoute><Aviation /></ProtectedRoute>} />
-        <Route path="/explore/architecture" element={<ProtectedRoute><Architecture /></ProtectedRoute>} />
+        <Route
+          path="/explore/travel-&-tourism"
+          element={
+            <ProtectedRoute>
+              <TravelAndTourism />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/change-password"
+          element={
+            <ProtectedRoute>
+              <ChangePassword />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/edit-profile"
+          element={
+            <ProtectedRoute>
+              <EditProfile />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/explore/countries"
+          element={
+            <ProtectedRoute>
+              <Countries />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/explore/wildlife"
+          element={
+            <ProtectedRoute>
+              <Wildlife />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/explore/fashion"
+          element={
+            <ProtectedRoute>
+              <Fashion />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/explore/automobile"
+          element={
+            <ProtectedRoute>
+              <AutoMobile />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/explore/education"
+          element={
+            <ProtectedRoute>
+              <Education />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/explore/food-&-cuisine"
+          element={
+            <ProtectedRoute>
+              <FoodAndCuisine />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/explore/science-&-research"
+          element={
+            <ProtectedRoute>
+              <ScienceAndResearch />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/explore/healthcare"
+          element={
+            <ProtectedRoute>
+              <Healthcare />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/explore/artificial-intelligence"
+          element={
+            <ProtectedRoute>
+              <ArtificialIntelligence />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/explore/space-&-astronomy"
+          element={
+            <ProtectedRoute>
+              <SpaceAndAstronomy />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/explore/aviation"
+          element={
+            <ProtectedRoute>
+              <Aviation />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/explore/architecture"
+          element={
+            <ProtectedRoute>
+              <Architecture />
+            </ProtectedRoute>
+          }
+        />
         <Route path="/" element={<Home />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/support" element={<HelpAndSupport />} />

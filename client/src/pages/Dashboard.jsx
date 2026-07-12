@@ -1,4 +1,3 @@
-import Carousel from "../components/Carousel";
 import { useNavigate } from "react-router-dom";
 import {
   UserRound,
@@ -484,10 +483,7 @@ export default function Dashboard() {
             </a>
           </div>
         </div>
-
-        
       </main>
-      <Carousel />
     </div>
   );
 }
