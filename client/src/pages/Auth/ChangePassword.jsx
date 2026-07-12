@@ -140,9 +140,9 @@ export default function ChangePassword() {
           <button
             type="submit"
             disabled={loading}
-            className="mt-4 w-full h-14 bg-[#ff6600] text-white font-bold rounded-[10px] active:scale-[0.98] transition-all shadow-md hover:opacity-85 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="mt-4 w-full h-14 bg-[#ff6600] text-white font-bold rounded-[10px] active:scale-[0.98] transition-all shadow-md hover:opacity-85 disabled:opacity-120 disabled:cursor-not-allowed"
           >
-            {loading ? <Loader size={60} color="black" /> : "Change Password"}
+            {loading ? <Loader size={60} color="white" /> : "Change Password"}
           </button>
 
           <button

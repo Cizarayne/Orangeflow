@@ -102,6 +102,7 @@ export default function App() {
           path="/explore/history"
           element={<ProtectedRoute><History /></ProtectedRoute>}
         />
+        <Route path="/reset-password/:token" element={<ResetPassword />} />
         <Route path="/explore/travel-&-tourism" element={<ProtectedRoute><TravelAndTourism /></ProtectedRoute>} />
         <Route path="/change-password"element={<ProtectedRoute><ChangePassword /></ProtectedRoute>}/>
         <Route path="/edit-profile" element={<ProtectedRoute><EditProfile /></ProtectedRoute>} />
@@ -122,7 +123,6 @@ export default function App() {
         <Route path="/support" element={<HelpAndSupport />} />
         <Route path="/login" element={<Login />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />

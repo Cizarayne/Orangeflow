@@ -95,7 +95,8 @@ export const AuthContext = create((set) => ({
       throw error;
     }
   },
-    getLastLogin: async () => {
+  
+  getLastLogin: async () => {
     try {
       const response = await connector.get("/user/last-login");
       return response.data.lastLogin;
@@ -104,12 +105,36 @@ export const AuthContext = create((set) => ({
       throw error;
     }
   },
-    getLoginHistory: async () => {
+
+  getLoginHistory: async () => {
     try {
       const response = await connector.get("/user/login-history");
       return response.data.loginHistory;
     } catch (error) {
       console.log("getLoginHistory error", error);
+      throw error;
+    }
+  },
+
+  forgotPassword: async (email) => {
+    try {
+      const response = await connector.post("/auth/forgot-password", { email });
+      return response.data;
+    } catch (error) {
+      console.log("forgotPassword error", error);
+      throw error;
+    }
+  },
+
+  resetPassword: async (token, newpassword, confirmnewpassword) => {
+    try {
+      const response = await connector.post(`/auth/reset-password/${token}`, {
+        newpassword,
+        confirmnewpassword,
+      });
+      return response.data;
+    } catch (error) {
+      console.log("resetPassword error", error);
       throw error;
     }
   },

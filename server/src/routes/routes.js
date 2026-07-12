@@ -6,6 +6,8 @@ import { updatedUser } from "../controllers/Private/update.Controller.js";
 import { deletedUser } from "../controllers/Private/delete.Controller.js";
 import { protectMiddleware } from "../middlewares/authMiddleware.js";
 import { changePassword } from "../controllers/Auth/changePass.Controller.js";
+import { forgotPassword } from "../controllers/Auth/forgotPass.Controller.js";
+import { resetPassword } from "../controllers/Auth/resetPass.Controller.js";
 import { logout } from "../controllers/Auth/logout.Controller.js";
 import { getUser } from "../controllers/Private/getuser.Controller.js";
 import { profile } from "../controllers/Private/profile.Controller.js";
@@ -25,6 +27,8 @@ route
   .get("/auth/profile", protectMiddleware, profile)
   .get("/user/last-login", protectMiddleware, getLastLogin)
   .get("/user/login-history", protectMiddleware, getLoginHistory)
-  .get("/user/:id", getUser);
+  .get("/user/:id", getUser)
+  .post("/auth/forgot-password", forgotPassword)
+  .post("/auth/reset-password/:token", resetPassword);
 
 export default route;

@@ -214,9 +214,9 @@ export default function Signup() {
           <button
             type="submit"
             disabled={loading}
-            className="mt-4 w-full h-14 bg-[#ff6600] text-white font-bold rounded-[10px] active:scale-[0.98] transition-all shadow-md hover:opacity-85 disabled:opacity-85 disabled:cursor-not-allowed"
+            className="mt-4 w-full h-14 bg-[#ff6600] text-white font-bold rounded-[10px] active:scale-[0.98] transition-all shadow-md hover:opacity-85 disabled:opacity-120 disabled:cursor-not-allowed"
           >
-            {loading ? <Loader size={60} color="black" /> : "Sign Up"}
+            {loading ? <Loader size={60} color="white" /> : "Sign Up"}
           </button>
 
           {/* Footer Link */}
