@@ -2,7 +2,7 @@ import express from "express";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import dotenv from "dotenv";
-dotenv.config()
+dotenv.config();
 
 import route from "./routes/routes.js";
 import connectDatabase from "./configs/database.js";
@@ -19,15 +19,37 @@ app.use(cors(corsOptions));
 app.use(express.json());
 app.use(cookieParser());
 
-const PORT = process.env.PORT || 8000;
-
 app.use("/api", route);
 
-const startServer = async () => {
-  await connectDatabase();
-  app.listen(PORT, () => {
-    console.log(`Server is running on port http://localhost:${PORT}`);
-  });
-};
-startServer();
+
+let isConnected = false;
+
+app.use(async (req, res, next) => {
+  if (!isConnected) {
+    try {
+      await connectDatabase();
+      isConnected = true;
+    } catch (error) {
+      console.error("Database connection failed:", error.message);
+      return res.status(500).json({ success: false, message: "Database connection failed" });
+    }
+  }
+  next();
+});
+
+if (process.env.VERCEL !== "1") {
+  const PORT = process.env.PORT || 8000;
+  connectDatabase()
+    .then(() => {
+      isConnected = true;
+      app.listen(PORT, () => {
+        console.log(`Server is running on http://localhost:${PORT}`);
+      });
+    })
+    .catch((error) => {
+      console.error("Failed to start server:", error.message);
+      process.exit(1);
+    });
+}
+
 export default app;
