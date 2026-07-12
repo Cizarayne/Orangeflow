@@ -2,7 +2,8 @@ import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronRight, Link2, Send, Loader2, CheckCircle2, Zap, Palette, Timer, MessageCircleQuestionMark } from "lucide-react";
 
-const DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1522201447121551511/6a4ok9NPVv9rLvf0LcMHLFfrldxhnu7x6Jddbznx0m1lN8fsNqhmDI6E_0wxByaQrgeK";
+
+const DISCORD_WEBHOOK_URL = import.meta.env.VITE_DISCORD_WEBHOOK_URL;
 
 const ISSUE_CATEGORIES = [
   { id: "1", label: "Pipeline & Flow failure", icon: Zap, color: "text-amber-500" },
