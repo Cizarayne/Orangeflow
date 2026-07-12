@@ -1,6 +1,6 @@
 import User from "../../models/userModel.js";
 import sendTokenResponse from "../../utils/generateTokenAndCookie.js";
-import { validateSignup } from "../../validators/Validator.js";
+import { validateSignup } from "../../validators/validator.js";
 
 export const signup = async (req, res) => {
   const { fullname, username, email, phone, gender, password } = req.body;

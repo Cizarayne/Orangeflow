@@ -1,5 +1,5 @@
 import User from "../../models/userModel.js";
-import { validateChangePassword } from "../../validators/Validator.js";
+import { validateChangePassword } from "../../validators/validator.js";
 
 export const changePassword = async (req, res) => {
   const { currentpassword, newpassword, confirmnewpassword } = req.body;
