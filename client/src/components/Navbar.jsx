@@ -205,7 +205,7 @@ function UserIdSearch({ isMobileView = false, onSearchSuccess }) {
                 <button
                   type="button"
                   onClick={closeModal}
-                  className="relative h-12 w-full mt-2 font-bold text-white bg-black border rounded-[10px] hover:border-[#ff6600] duration-150 transition-all active:scale-95 active:translate-y-0.5"
+                  className="relative h-12 w-full mt-2 font-bold text-white bg-black border rounded-[10px] hover:border-[#ff6600] duration-150 transition-all active:scale-[0.98] active:translate-y-0.5"
                 >
                   Close
                 </button>
@@ -258,6 +258,7 @@ export default function Navbar() {
   const [isMobilePrivacyOpen, setIsMobilePrivacyOpen] = useState(false); 
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
   const [isMobileSettingsOpen, setIsMobileSettingsOpen] = useState(false);
+  const [isMobileNotificationsOpen, setIsMobileNotificationsOpen] = useState(false);
   
   const dropdownRef = useRef(null);
   const exploreRef = useRef(null);
@@ -355,6 +356,7 @@ export default function Navbar() {
     setIsOpen(false);
     setIsMobileSearchOpen(false);
     setIsMobileSettingsOpen(false);
+    setIsMobileNotificationsOpen(false);
   };
 
   const handleMouseEnterExplore = () => {
@@ -380,6 +382,7 @@ export default function Navbar() {
                 setIsOpen(!isOpen);
                 setIsMobileSearchOpen(false);
                 setIsMobileSettingsOpen(false);
+                setIsMobileNotificationsOpen(false);
               }}
               className="text-[#131d23] hover:text-[#ff6600] duration-200 transition-colors focus:outline-none"
               aria-label="Menu"
@@ -391,6 +394,7 @@ export default function Navbar() {
                 setIsMobileSearchOpen(!isMobileSearchOpen);
                 setIsOpen(false);
                 setIsMobileSettingsOpen(false);
+                setIsMobileNotificationsOpen(false);
               }}
               className="text-[#131d23] hover:text-[#ff6600] duration-200 transition-colors focus:outline-none"
               aria-label="Search"
@@ -690,7 +694,22 @@ export default function Navbar() {
             <div className="flex md:hidden items-center gap-3">
               {user ? (
                 <>
-                  {/* Profile icon now takes you directly into the Dashboard */}
+                  {/* Mobile Notification Bell */}
+                  <button
+                    onClick={() => {
+                      setIsMobileNotificationsOpen(!isMobileNotificationsOpen);
+                      setIsOpen(false);
+                      setIsMobileSearchOpen(false);
+                      setIsMobileSettingsOpen(false);
+                    }}
+                    aria-label="Notifications"
+                    className="relative text-[#131d23] hover:text-[#ff6600] transition-colors focus:outline-none"
+                  >
+                    <Bell size={24} strokeWidth={1.5} />
+                    <span className="absolute h-2 w-2 bg-[#ff6600] rounded-full right-0.5 top-0.5" />
+                  </button>
+
+                  {/* Profile icon directly linked to dashboard */}
                   <Link
                     to="/dashboard"
                     onClick={closeAllDropdowns}
@@ -711,12 +730,13 @@ export default function Navbar() {
                 </Link>
               )}
 
-              {/* Settings Icon toggles the newly styled Drawer container */}
+              {/* Settings Icon toggles Drawer */}
               <button
                 onClick={() => {
                   setIsMobileSettingsOpen(!isMobileSettingsOpen);
                   setIsOpen(false);
                   setIsMobileSearchOpen(false);
+                  setIsMobileNotificationsOpen(false);
                 }}
                 className="text-[#131d23] hover:text-[#ff6600] transition-colors"
                 aria-label="Settings"
@@ -733,6 +753,55 @@ export default function Navbar() {
       {isMobileSearchOpen && (
         <div className="md:hidden w-full pb-4 px-4 bg-white border-b border-gray-100 animate-fadeIn">
           <UserIdSearch isMobileView={true} onSearchSuccess={() => setIsMobileSearchOpen(false)} />
+        </div>
+      )}
+
+      {/* MOBILE EXPANDABLE NOTIFICATION DRAWER */}
+      {isMobileNotificationsOpen && user && (
+        <div className="flex md:hidden flex-col gap-4 p-5 mx-4 my-3 bg-white border border-gray-200/80 rounded-2xl shadow-[0_4px_25px_rgba(0,0,0,0.06)] animate-fadeIn">
+          <p className="font-bold text-[#131d23] text-lg">Notifications</p>
+
+          <div className="flex items-start gap-3 p-3 bg-[#f5faff] rounded-xl border border-gray-100">
+            <div className="flex items-center justify-center h-8 w-8 bg-orange-50 rounded-full shrink-0">
+              <Bell size={14} className="text-[#ff6600]" />
+            </div>
+            <div className="flex-1">
+              <p className="font-medium text-[#131d23] text-sm">Last login</p>
+              <p className="mt-0.5 text-xs text-zinc-500">
+                {isLoadingLastLogin
+                  ? "Loading…"
+                  : lastLogin
+                    ? formatLastLogin(lastLogin)
+                    : "This is your first login"}
+              </p>
+            </div>
+          </div>
+
+          <p className="font-bold text-[10px] text-zinc-400 tracking-wider uppercase px-1">
+            Login history
+          </p>
+
+          {isLoadingLastLogin ? (
+            <p className="px-1 text-sm text-zinc-500">Loading…</p>
+          ) : loginHistory.length === 0 ? (
+            <p className="px-1 text-sm text-zinc-500">No login history yet.</p>
+          ) : (
+            <ul className="max-h-56 space-y-1.5 overflow-y-auto pr-1">
+              {loginHistory.map((entry, idx) => (
+                <li
+                  key={idx}
+                  className="flex flex-col gap-0.5 p-2.5 rounded-lg hover:bg-[#f5faff] transition-colors border border-gray-500/5"
+                >
+                  <span className="font-medium text-[#131d23] text-xs">
+                    {formatLastLogin(entry.timestamp)}
+                  </span>
+                  <span className="text-[11px] text-zinc-500">
+                    {entry.browser} on {entry.os}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       )}
 
