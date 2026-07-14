@@ -6,9 +6,6 @@ import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../../store/Auth";
 import Loader from "../../components/ui/Loader";
 
-
-
-
 export default function Login() {
   const [formData, setFormData] = useState({
     identifier: "",
@@ -33,7 +30,7 @@ export default function Login() {
   const handleSubmit = async (event) => {
     event.preventDefault();
     setLoading(true);
-    
+
     try {
       if (!formData.identifier || !formData.password) {
         throw new Error("Please fill in all fields");
@@ -51,7 +48,7 @@ export default function Login() {
       // Call login API
       await login(payload);
       toast.success("Login successful, Welcome back!");
-      navigate("/explore");
+      navigate("/explore", { replace: true });
     } catch (error) {
       // Server error handling moved here where 'error' is defined
       const status = error.response?.status;
@@ -62,7 +59,9 @@ export default function Login() {
       } else if (status === 404) {
         toast.error("Account not found, please sign up");
       } else if (status === 400) {
-        toast.error(serverMessage || "Invalid input, please check your details");
+        toast.error(
+          serverMessage || "Invalid input, please check your details",
+        );
       } else {
         toast.error(serverMessage || error.message || "Something went wrong");
       }
@@ -84,7 +83,7 @@ export default function Login() {
             Join thousands already in the flow
           </p>
         </section>
-        
+
         {/* Login Form */}
         <form onSubmit={handleSubmit} className="w-full flex flex-col gap-4">
           {/* Identifier */}
