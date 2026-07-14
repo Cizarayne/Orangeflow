@@ -29,7 +29,7 @@ import logoImg from "../assets/Orangeflow.png";
 import Loader from "./ui/Loader"; 
 
 /* Expand-on-hover search bar — looks up a user by Flow ID via the public /user/:id endpoint */
-function UserIdSearch() {
+function UserIdSearch({ isMobileView = false, onSearchSuccess }) {
   const [query, setQuery] = useState("");
   const [result, setResult] = useState(null);
   const [error, setError] = useState("");
@@ -51,6 +51,7 @@ function UserIdSearch() {
     try {
       const data = await getuser(id);
       setResult(data);
+      if (onSearchSuccess) onSearchSuccess();
     } catch (err) {
       setError(err.response?.data?.message || "User not found");
     } finally {
@@ -68,7 +69,7 @@ function UserIdSearch() {
   return (
     <>
       <form onSubmit={handleSearch} className="w-full md:w-auto">
-        <div className="flex items-center h-10 w-full md:w-10 md:focus-within:w-64 md:hover:w-64 bg-[#f5faff] border border-[#BFC9D1] rounded-full duration-300 ease-out transition-all overflow-hidden">
+        <div className={`flex items-center h-10 w-full ${isMobileView ? "bg-[#f5faff] border border-[#BFC9D1] rounded-full" : "md:w-10 md:focus-within:w-64 md:hover:w-64 bg-[#f5faff] border border-[#BFC9D1] rounded-full duration-300 ease-out transition-all overflow-hidden"}`}>
           <span className="flex items-center justify-center h-10 w-10 text-[#131d23] shrink-0">
             <Search size={18} />
           </span>
@@ -255,6 +256,7 @@ export default function Navbar() {
   const [isMobileExploreOpen, setIsMobileExploreOpen] = useState(false); 
   const [isPrivacyOpen, setIsPrivacyOpen] = useState(false);
   const [isMobilePrivacyOpen, setIsMobilePrivacyOpen] = useState(false); 
+  const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
   
   const dropdownRef = useRef(null);
   const exploreRef = useRef(null);
@@ -350,6 +352,7 @@ export default function Navbar() {
     setIsExploreOpen(false);
     setIsMobileExploreOpen(false);
     setIsOpen(false);
+    setIsMobileSearchOpen(false);
   };
 
   const handleMouseEnterExplore = () => {
@@ -364,16 +367,42 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="sticky max-w-[92%] xl:max-w-7xl mx-auto my-6 text-[#131d23] bg-white/95 border border-gray-100/50 rounded-[50px] shadow-[0_0_50px_rgba(0,0,0,0.12)] duration-300 transition-all backdrop-blur-md left-0 right-0 ring-1 ring-black/5 top-6 z-50">
-      <div className="w-full px-6 lg:px-10 sm:px-8">
-        <div className="flex items-center justify-between h-20">
-          {/* Logo Section */}
-          <div className="flex items-center shrink-0">
-            <Link to="/" className="flex items-center">
+    <nav className="fixed md:sticky w-full md:max-w-[92%] xl:max-w-7xl mx-auto my-0 md:my-6 text-[#131d23] bg-white border-b border-gray-200 md:border md:border-gray-100/50 rounded-none md:rounded-[50px] shadow-none md:shadow-[0_0_50px_rgba(0,0,0,0.12)] duration-300 transition-all backdrop-blur-md left-0 right-0 md:ring-1 md:ring-black/5 top-0 md:top-6 z-50">
+      <div className="w-full px-4 md:px-10 sm:px-8">
+        {/* Adjusted Heights and Row Spacings to resemble reference layout */}
+        <div className="flex items-center justify-between h-16 md:h-20">
+          
+          {/* MOBILE LEFT BLOCK: Hamburger & Search triggers */}
+          <div className="flex items-center gap-4 md:hidden">
+            <button
+              onClick={() => {
+                setIsOpen(!isOpen);
+                setIsMobileSearchOpen(false);
+              }}
+              className="text-[#131d23] hover:text-[#ff6600] duration-200 transition-colors focus:outline-none"
+              aria-label="Menu"
+            >
+              {isOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
+            <button
+              onClick={() => {
+                setIsMobileSearchOpen(!isMobileSearchOpen);
+                setIsOpen(false);
+              }}
+              className="text-[#131d23] hover:text-[#ff6600] duration-200 transition-colors focus:outline-none"
+              aria-label="Search"
+            >
+              <Search size={22} />
+            </button>
+          </div>
+
+          {/* CENTER LOGO BLOCK (Always Centered on Mobile, Left-aligned on Desktop) */}
+          <div className="absolute left-1/2 -translate-x-1/2 md:static md:translate-x-0 flex items-center shrink-0">
+            <Link to="/" className="flex items-center" onClick={closeAllDropdowns}>
               <img
                 src={logoImg}
                 alt="Orangeflow Logo"
-                className="h-36 w-auto mt-1 align-left object-contain"
+                className="h-28 w-auto md:h-36 mt-1 object-contain"
               />
             </Link>
           </div>
@@ -388,7 +417,7 @@ export default function Navbar() {
               <span className="absolute h-0.5 w-full bg-[#ff6600] duration-300 ease-out transition-transform bottom-0 left-0 origin-center scale-x-0 group-hover:scale-x-100" />
             </Link>
 
-            {/* Explore dropdown triggering on hover and linking to /explore on click */}
+            {/* Explore dropdown */}
             <div 
               className="relative" 
               ref={exploreRef}
@@ -405,8 +434,7 @@ export default function Navbar() {
               </Link>
 
               {isExploreOpen && (
-                /* Changed w-140 to w-[32rem] (or choose w-96) to prevent container overflow layout breakdown */
-                <div className="absolute left-1/2 -translate-x-1/2 w-[32rem] pt-4 mt-0 z-50 transform transition-all animate-fadeIn">
+                <div className="absolute left-1/2 -translate-x-1/2 w-lg pt-4 mt-0 z-50 transform transition-all animate-fadeIn">
                   <div className="p-4 bg-white border border-gray-100 rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.12)] grid grid-cols-2 gap-1.5">
                     {exploreCategories.map((category) => (
                       <Link
@@ -440,237 +468,272 @@ export default function Navbar() {
             </Link>
           </div>
 
-          {/* Desktop Auth CTA Buttons / Dropdown */}
-          <div className="hidden md:flex items-center gap-4">
-            <UserIdSearch />
+          {/* RIGHT SIDE ACTIONS: Desktop vs Mobile Profile & Navigation Settings */}
+          <div className="flex items-center gap-4">
+            
+            {/* Desktop Only Search & Actions */}
+            <div className="hidden md:flex items-center gap-4">
+              <UserIdSearch />
 
-            {user ? (
-              <>
-                {/* NOTIFICATION BELL */}
-                <div className="relative" ref={notificationRef}>
-                  <button
-                    onClick={() => setNotificationOpen((prev) => !prev)}
-                    aria-label="Notifications"
-                    aria-expanded={notificationOpen}
-                    className={`relative flex items-center justify-center w-10 h-10 rounded-full transition-all duration-200 focus:outline-none ${
-                      notificationOpen
-                        ? "text-[#ff6600] bg-[#ff6600]/5"
-                        : "text-[#131d23] hover:text-[#ff6600]"
-                    }`}
-                  >
-                    <Bell size={22} strokeWidth={1.5} />
-                    <span className="absolute h-2 w-2 bg-[#ff6600] rounded-full right-2 top-2" />
-                  </button>
+              {user ? (
+                <>
+                  {/* NOTIFICATION BELL */}
+                  <div className="relative" ref={notificationRef}>
+                    <button
+                      onClick={() => setNotificationOpen((prev) => !prev)}
+                      aria-label="Notifications"
+                      aria-expanded={notificationOpen}
+                      className={`relative flex items-center justify-center w-10 h-10 rounded-full transition-all duration-200 focus:outline-none ${
+                        notificationOpen
+                          ? "text-[#ff6600] bg-[#ff6600]/5"
+                          : "text-[#131d23] hover:text-[#ff6600]"
+                      }`}
+                    >
+                      <Bell size={22} strokeWidth={1.5} />
+                      <span className="absolute h-2 w-2 bg-[#ff6600] rounded-full right-2 top-2" />
+                    </button>
 
-                  {notificationOpen && (
-                    <div className="absolute w-80 mt-3 p-4 bg-white border border-gray-100 rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.12)] transform transition-all animate-fadeIn origin-top-right right-0 z-50">
-                      <p className="mb-3 font-bold text-[#131d23] text-sm">
-                        Notifications
-                      </p>
+                    {notificationOpen && (
+                      <div className="absolute w-80 mt-3 p-4 bg-white border border-gray-100 rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.12)] transform transition-all animate-fadeIn origin-top-right right-0 z-50">
+                        <p className="mb-3 font-bold text-[#131d23] text-sm">
+                          Notifications
+                        </p>
 
-                      <div className="flex items-start gap-3 mb-3 p-3 bg-[#f5faff] rounded-xl">
-                        <div className="flex items-center justify-center h-8 w-8 bg-orange-50 rounded-full shrink-0">
-                          <Bell size={14} className="text-[#ff6600]" />
+                        <div className="flex items-start gap-3 mb-3 p-3 bg-[#f5faff] rounded-xl">
+                          <div className="flex items-center justify-center h-8 w-8 bg-orange-50 rounded-full shrink-0">
+                            <Bell size={14} className="text-[#ff6600]" />
+                          </div>
+                          <div className="flex-1">
+                            <p className="font-medium text-[#131d23] text-sm">
+                              Last login
+                            </p>
+                            <p className="mt-0.5 text-xs text-zinc-500">
+                              {isLoadingLastLogin
+                                ? "Loading…"
+                                : lastLogin
+                                  ? formatLastLogin(lastLogin)
+                                  : "This is your first login"}
+                            </p>
+                          </div>
                         </div>
-                        <div className="flex-1">
-                          <p className="font-medium text-[#131d23] text-sm">
-                            Last login
+
+                        <p className="mb-2 px-1 font-bold text-[10px] text-zinc-400 tracking-wider uppercase">
+                          Login history
+                        </p>
+
+                        {isLoadingLastLogin ? (
+                          <p className="px-1 text-sm text-zinc-500">Loading…</p>
+                        ) : loginHistory.length === 0 ? (
+                          <p className="px-1 text-sm text-zinc-500">
+                            No login history yet.
                           </p>
-                          <p className="mt-0.5 text-xs text-zinc-500">
-                            {isLoadingLastLogin
-                              ? "Loading…"
-                              : lastLogin
-                                ? formatLastLogin(lastLogin)
-                                : "This is your first login"}
+                        ) : (
+                          <ul className="max-h-56 pr-1 space-y-1.5 overflow-y-auto">
+                            {loginHistory.map((entry, idx) => (
+                              <li
+                                key={idx}
+                                className="flex flex-col gap-0.5 p-2.5 rounded-lg hover:bg-[#f5faff] transition-colors"
+                              >
+                                <span className="font-medium text-[#131d23] text-xs">
+                                  {formatLastLogin(entry.timestamp)}
+                                </span>
+                                <span className="text-[11px] text-zinc-500">
+                                  {entry.browser} on {entry.os}
+                                </span>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="relative" ref={dropdownRef}>
+                    <button
+                      onClick={() => {
+                        setIsDropdownOpen(!isDropdownOpen);
+                        if (isDropdownOpen) setIsPrivacyOpen(false);
+                      }}
+                      className="flex items-center justify-center text-[#131d23] hover:text-[#ff6600] duration-200 transition-all active:scale-95 focus:outline-none"
+                      aria-label="User Profile Menu"
+                    >
+                      <CircleUserRound size={34} strokeWidth={1.5} />
+                    </button>
+
+                    {isDropdownOpen && (
+                      <div className="absolute w-64 mt-3 py-3 bg-white border border-gray-100 rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.12)] transform transition-all animate-fadeIn origin-top-right right-0 z-50">
+                        <div className="mb-2 px-4 py-2 border-b border-gray-100/80">
+                          <p className="font-bold text-[#131d23] text-sm truncate">
+                            {user.fullname || "Orangeflow User"}
                           </p>
+                          <p className="mt-0.5 text-xs text-zinc-500 truncate">
+                            {user.email}
+                          </p>
+                        </div>
+
+                        <div className="flex flex-col gap-0.5 px-2">
+                          <Link
+                            to="/dashboard"
+                            onClick={closeAllDropdowns}
+                            className="flex items-center gap-3 px-3 py-2 font-semibold text-sm text-zinc-600 hover:text-[#ff6600] rounded-xl hover:bg-[#ff6600]/5 duration-200 transition-all"
+                          >
+                            <ChartPie size={18} className="text-zinc-400" />
+                            <span>Dashboard</span>
+                          </Link>
+
+                          <Link
+                            to="/support"
+                            onClick={closeAllDropdowns}
+                            className="flex items-center gap-3 px-3 py-2 font-semibold text-sm text-zinc-600 hover:text-[#ff6600] rounded-xl hover:bg-[#ff6600]/5 duration-200 transition-all"
+                          >
+                            <Headset size={18} className="text-zinc-400" />
+                            <span>Help & Support</span>
+                          </Link>
+
+                          <div>
+                            <button
+                              onClick={() => setIsPrivacyOpen(!isPrivacyOpen)}
+                              className="flex items-center justify-between w-full px-3 py-2 font-semibold text-left text-sm text-zinc-600 hover:text-[#ff6600] rounded-xl hover:bg-[#ff6600]/5 duration-200 transition-all"
+                            >
+                              <div className="flex items-center gap-3">
+                                <Bolt size={18} className="text-zinc-400" />
+                                <span>Privacy & Security</span>
+                              </div>
+                              {isPrivacyOpen ? (
+                                <ChevronDown
+                                  size={16}
+                                  className="text-zinc-400"
+                                />
+                              ) : (
+                                <ChevronRight
+                                  size={16}
+                                  className="text-zinc-400"
+                                />
+                              )}
+                            </button>
+
+                            {isPrivacyOpen && (
+                              <div className="flex flex-col gap-0.5 ml-4 mt-1 pl-2 border-gray-100 border-l transition-all">
+                                <Link
+                                  to="/edit-profile"
+                                  onClick={closeAllDropdowns}
+                                  className="flex items-center gap-3 px-3 py-1.5 font-semibold text-xs text-zinc-500 hover:text-[#ff6600] rounded-lg hover:bg-[#ff6600]/5 duration-200 transition-all"
+                                >
+                                  <UserRoundCog
+                                    size={16}
+                                    className="text-zinc-400"
+                                  />
+                                  <span>Edit profile</span>
+                                </Link>
+
+                                <Link
+                                  to="/change-password"
+                                  onClick={closeAllDropdowns}
+                                  className="flex items-center gap-3 px-3 py-1.5 font-semibold text-xs text-zinc-500 hover:text-[#ff6600] rounded-lg hover:bg-[#ff6600]/5 duration-200 transition-all"
+                                >
+                                  <UserRoundKey
+                                    size={16}
+                                    className="text-zinc-400"
+                                  />
+                                  <span>Change password</span>
+                                </Link>
+
+                                <Link
+                                  to="/delete-account"
+                                  onClick={closeAllDropdowns}
+                                  className="flex items-center gap-3 px-3 py-1.5 font-semibold text-red-500 text-xs rounded-lg hover:bg-red-50 duration-200 transition-all"
+                                >
+                                  <UserRoundX
+                                    size={16}
+                                    className="text-red-400"
+                                  />
+                                  <span>Delete account</span>
+                                </Link>
+                              </div>
+                            )}
+                          </div>
+
+                          <hr className="mx-2 my-1 border-gray-100" />
+
+                          <button
+                            onClick={handleLogout}
+                            className="flex items-center w-full gap-3 px-3 py-2.5 font-bold text-left text-red-600 text-sm rounded-xl hover:bg-red-50 duration-200 transition-all"
+                          >
+                            <LogOut size={18} />
+                            <span>Logout</span>
+                          </button>
                         </div>
                       </div>
+                    )}
+                  </div>
+                </>
+              ) : (
+                <>
+                  <Link to="/login">
+                    <button className="h-11 px-6 font-bold text-sm text-white bg-[#ff6600] rounded-xl shadow-sm duration-200 transition-all hover:opacity-85 active:scale-[0.98]">
+                      Login
+                    </button>
+                  </Link>
+                  <Link to="/signup">
+                    <button className="h-11 px-6 font-bold text-sm text-white bg-black rounded-xl shadow-sm duration-200 transition-all hover:opacity-85 active:scale-[0.98]">
+                      Sign Up
+                    </button>
+                  </Link>
+                </>
+              )}
+            </div>
 
-                      <p className="mb-2 px-1 font-bold text-[10px] text-zinc-400 tracking-wider uppercase">
-                        Login history
-                      </p>
-
-                      {isLoadingLastLogin ? (
-                        <p className="px-1 text-sm text-zinc-500">Loading…</p>
-                      ) : loginHistory.length === 0 ? (
-                        <p className="px-1 text-sm text-zinc-500">
-                          No login history yet.
-                        </p>
-                      ) : (
-                        <ul className="max-h-56 pr-1 space-y-1.5 overflow-y-auto">
-                          {loginHistory.map((entry, idx) => (
-                            <li
-                              key={idx}
-                              className="flex flex-col gap-0.5 p-2.5 rounded-lg hover:bg-[#f5faff] transition-colors"
-                            >
-                              <span className="font-medium text-[#131d23] text-xs">
-                                {formatLastLogin(entry.timestamp)}
-                              </span>
-                              <span className="text-[11px] text-zinc-500">
-                                {entry.browser} on {entry.os}
-                              </span>
-                            </li>
-                          ))}
-                        </ul>
-                      )}
-                    </div>
-                  )}
-                </div>
-
-                <div className="relative" ref={dropdownRef}>
+            {/* MOBILE ONLY RIGHT SIDE ACTION ICONS */}
+            <div className="flex md:hidden items-center gap-3">
+              {user ? (
+                <>
                   <button
                     onClick={() => {
-                      setIsDropdownOpen(!isDropdownOpen);
-                      if (isDropdownOpen) setIsPrivacyOpen(false);
+                      setIsOpen(!isOpen);
+                      setIsMobileSearchOpen(false);
                     }}
-                    className="flex items-center justify-center text-[#131d23] hover:text-[#ff6600] duration-200 transition-all active:scale-95 focus:outline-none"
-                    aria-label="User Profile Menu"
+                    className="text-[#131d23] hover:text-[#ff6600] transition-colors"
+                    aria-label="Profile"
                   >
-                    <CircleUserRound size={34} strokeWidth={1.5} />
+                    <CircleUserRound size={26} strokeWidth={1.5} />
                   </button>
-
-                  {isDropdownOpen && (
-                    <div className="absolute w-64 mt-3 py-3 bg-white border border-gray-100 rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.12)] transform transition-all animate-fadeIn origin-top-right right-0 z-50">
-                      <div className="mb-2 px-4 py-2 border-b border-gray-100/80">
-                        <p className="font-bold text-[#131d23] text-sm truncate">
-                          {user.fullname || "Orangeflow User"}
-                        </p>
-                        <p className="mt-0.5 text-xs text-zinc-500 truncate">
-                          {user.email}
-                        </p>
-                      </div>
-
-                      <div className="flex flex-col gap-0.5 px-2">
-                        <Link
-                          to="/dashboard"
-                          onClick={closeAllDropdowns}
-                          className="flex items-center gap-3 px-3 py-2 font-semibold text-sm text-zinc-600 hover:text-[#ff6600] rounded-xl hover:bg-[#ff6600]/5 duration-200 transition-all"
-                        >
-                          <ChartPie size={18} className="text-zinc-400" />
-                          <span>Dashboard</span>
-                        </Link>
-
-                        <Link
-                          to="/support"
-                          onClick={closeAllDropdowns}
-                          className="flex items-center gap-3 px-3 py-2 font-semibold text-sm text-zinc-600 hover:text-[#ff6600] rounded-xl hover:bg-[#ff6600]/5 duration-200 transition-all"
-                        >
-                          <Headset size={18} className="text-zinc-400" />
-                          <span>Help & Support</span>
-                        </Link>
-
-                        <div>
-                          <button
-                            onClick={() => setIsPrivacyOpen(!isPrivacyOpen)}
-                            className="flex items-center justify-between w-full px-3 py-2 font-semibold text-left text-sm text-zinc-600 hover:text-[#ff6600] rounded-xl hover:bg-[#ff6600]/5 duration-200 transition-all"
-                          >
-                            <div className="flex items-center gap-3">
-                              <Bolt size={18} className="text-zinc-400" />
-                              <span>Privacy & Security</span>
-                            </div>
-                            {isPrivacyOpen ? (
-                              <ChevronDown
-                                size={16}
-                                className="text-zinc-400"
-                              />
-                            ) : (
-                              <ChevronRight
-                                size={16}
-                                className="text-zinc-400"
-                              />
-                            )}
-                          </button>
-
-                          {isPrivacyOpen && (
-                            <div className="flex flex-col gap-0.5 ml-4 mt-1 pl-2 border-gray-100 border-l transition-all">
-                              <Link
-                                to="/edit-profile"
-                                onClick={closeAllDropdowns}
-                                className="flex items-center gap-3 px-3 py-1.5 font-semibold text-xs text-zinc-500 hover:text-[#ff6600] rounded-lg hover:bg-[#ff6600]/5 duration-200 transition-all"
-                              >
-                                <UserRoundCog
-                                  size={16}
-                                  className="text-zinc-400"
-                                />
-                                <span>Edit profile</span>
-                              </Link>
-
-                              <Link
-                                to="/change-password"
-                                onClick={closeAllDropdowns}
-                                className="flex items-center gap-3 px-3 py-1.5 font-semibold text-xs text-zinc-500 hover:text-[#ff6600] rounded-lg hover:bg-[#ff6600]/5 duration-200 transition-all"
-                              >
-                                <UserRoundKey
-                                  size={16}
-                                  className="text-zinc-400"
-                                />
-                                <span>Change password</span>
-                              </Link>
-
-                              <Link
-                                to="/delete-account"
-                                onClick={closeAllDropdowns}
-                                className="flex items-center gap-3 px-3 py-1.5 font-semibold text-red-500 text-xs rounded-lg hover:bg-red-50 duration-200 transition-all"
-                              >
-                                <UserRoundX
-                                  size={16}
-                                  className="text-red-400"
-                                />
-                                <span>Delete account</span>
-                              </Link>
-                            </div>
-                          )}
-                        </div>
-
-                        <hr className="mx-2 my-1 border-gray-100" />
-
-                        <button
-                          onClick={handleLogout}
-                          className="flex items-center w-full gap-3 px-3 py-2.5 font-bold text-left text-red-600 text-sm rounded-xl hover:bg-red-50 duration-200 transition-all"
-                        >
-                          <LogOut size={18} />
-                          <span>Logout</span>
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </>
-            ) : (
-              <>
-                <Link to="/login">
-                  <button className="h-11 px-6 font-bold text-sm text-white bg-[#ff6600] rounded-xl shadow-sm duration-200 transition-all hover:opacity-85 active:scale-[0.98]">
-                    Login
-                  </button>
+                </>
+              ) : (
+                <Link
+                  to="/login"
+                  className="text-[#131d23] hover:text-[#ff6600]"
+                  aria-label="Login"
+                >
+                  <CircleUserRound size={26} strokeWidth={1.5} />
                 </Link>
-                <Link to="/signup">
-                  <button className="h-11 px-6 font-bold text-sm text-white bg-black rounded-xl shadow-sm duration-200 transition-all hover:opacity-85 active:scale-[0.98]">
-                    Sign Up
-                  </button>
-                </Link>
-              </>
-            )}
-          </div>
+              )}
+              {/* Settings Icon placed exactly as reference */}
+              <button
+                onClick={() => {
+                  setIsOpen(!isOpen);
+                  setIsMobilePrivacyOpen(true);
+                }}
+                className="text-[#131d23] hover:text-[#ff6600] transition-colors"
+                aria-label="Settings"
+              >
+                <Bolt size={24} strokeWidth={1.5} />
+              </button>
+            </div>
 
-          {/* Mobile Hamburger Menu Toggle */}
-          <div className="flex md:hidden">
-            <button
-              onClick={() => setIsOpen(!isOpen)}
-              className="text-[#131d23] hover:text-[#ff6600] duration-200 transition-colors focus:outline-none"
-            >
-              {isOpen ? <X size={26} /> : <Menu size={26} />}
-            </button>
           </div>
         </div>
       </div>
 
+      {/* MOBILE EXPANDABLE SEARCH DRAWER */}
+      {isMobileSearchOpen && (
+        <div className="md:hidden w-full pb-4 px-4 bg-white border-b border-gray-100 animate-fadeIn">
+          <UserIdSearch isMobileView={true} onSearchSuccess={() => setIsMobileSearchOpen(false)} />
+        </div>
+      )}
+
       {/* Mobile Menu Panel */}
       {isOpen && (
-        <div className="flex flex-col md:hidden gap-4 pb-6 pt-4 px-6 bg-white border-gray-500/30 border-t rounded-b-2xl animate-fadeIn">
-          <div className="pb-2 px-1">
-            <UserIdSearch />
-          </div>
-
+        <div className="flex flex-col md:hidden gap-4 pb-6 pt-4 px-6 bg-white border-t border-gray-100 animate-fadeIn">
           <div className="flex flex-col gap-3">
             <Link
               to="/"
