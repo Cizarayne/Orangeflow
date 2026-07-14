@@ -257,6 +257,7 @@ export default function Navbar() {
   const [isPrivacyOpen, setIsPrivacyOpen] = useState(false);
   const [isMobilePrivacyOpen, setIsMobilePrivacyOpen] = useState(false); 
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
+  const [isMobileSettingsOpen, setIsMobileSettingsOpen] = useState(false);
   
   const dropdownRef = useRef(null);
   const exploreRef = useRef(null);
@@ -353,6 +354,7 @@ export default function Navbar() {
     setIsMobileExploreOpen(false);
     setIsOpen(false);
     setIsMobileSearchOpen(false);
+    setIsMobileSettingsOpen(false);
   };
 
   const handleMouseEnterExplore = () => {
@@ -367,9 +369,8 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="fixed md:sticky w-full md:max-w-[92%] xl:max-w-7xl mx-auto my-0 md:my-6 text-[#131d23] bg-white border-b border-gray-200 md:border md:border-gray-100/50 rounded-none md:rounded-[50px] shadow-none md:shadow-[0_0_50px_rgba(0,0,0,0.12)] duration-300 transition-all backdrop-blur-md left-0 right-0 md:ring-1 md:ring-black/5 top-0 md:top-6 z-50">
+    <nav className="relative md:sticky w-full md:max-w-[92%] xl:max-w-7xl mx-auto my-0 md:my-6 text-[#131d23] bg-white border-b border-gray-200 md:border md:border-gray-100/50 rounded-none md:rounded-[50px] shadow-none md:shadow-[0_0_50px_rgba(0,0,0,0.12)] duration-300 transition-all backdrop-blur-md left-0 right-0 md:ring-1 md:ring-black/5 top-0 md:top-6 z-50">
       <div className="w-full px-4 md:px-10 sm:px-8">
-        {/* Adjusted Heights and Row Spacings to resemble reference layout */}
         <div className="flex items-center justify-between h-16 md:h-20">
           
           {/* MOBILE LEFT BLOCK: Hamburger & Search triggers */}
@@ -378,6 +379,7 @@ export default function Navbar() {
               onClick={() => {
                 setIsOpen(!isOpen);
                 setIsMobileSearchOpen(false);
+                setIsMobileSettingsOpen(false);
               }}
               className="text-[#131d23] hover:text-[#ff6600] duration-200 transition-colors focus:outline-none"
               aria-label="Menu"
@@ -388,6 +390,7 @@ export default function Navbar() {
               onClick={() => {
                 setIsMobileSearchOpen(!isMobileSearchOpen);
                 setIsOpen(false);
+                setIsMobileSettingsOpen(false);
               }}
               className="text-[#131d23] hover:text-[#ff6600] duration-200 transition-colors focus:outline-none"
               aria-label="Search"
@@ -434,7 +437,7 @@ export default function Navbar() {
               </Link>
 
               {isExploreOpen && (
-                <div className="absolute left-1/2 -translate-x-1/2 w-lg pt-4 mt-0 z-50 transform transition-all animate-fadeIn">
+                <div className="absolute left-1/2 -translate-x-1/2 w-[32rem] pt-4 mt-0 z-50 transform transition-all animate-fadeIn">
                   <div className="p-4 bg-white border border-gray-100 rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.12)] grid grid-cols-2 gap-1.5">
                     {exploreCategories.map((category) => (
                       <Link
@@ -683,40 +686,42 @@ export default function Navbar() {
               )}
             </div>
 
-            {/* MOBILE ONLY RIGHT SIDE ACTION ICONS */}
+            {/* MOBILE ONLY ACTIONS */}
             <div className="flex md:hidden items-center gap-3">
               {user ? (
                 <>
-                  <button
-                    onClick={() => {
-                      setIsOpen(!isOpen);
-                      setIsMobileSearchOpen(false);
-                    }}
+                  {/* Profile icon now takes you directly into the Dashboard */}
+                  <Link
+                    to="/dashboard"
+                    onClick={closeAllDropdowns}
                     className="text-[#131d23] hover:text-[#ff6600] transition-colors"
-                    aria-label="Profile"
+                    aria-label="Profile Dashboard"
                   >
                     <CircleUserRound size={26} strokeWidth={1.5} />
-                  </button>
+                  </Link>
                 </>
               ) : (
                 <Link
                   to="/login"
+                  onClick={closeAllDropdowns}
                   className="text-[#131d23] hover:text-[#ff6600]"
                   aria-label="Login"
                 >
                   <CircleUserRound size={26} strokeWidth={1.5} />
                 </Link>
               )}
-              {/* Settings Icon placed exactly as reference */}
+
+              {/* Settings Icon toggles the newly styled Drawer container */}
               <button
                 onClick={() => {
-                  setIsOpen(!isOpen);
-                  setIsMobilePrivacyOpen(true);
+                  setIsMobileSettingsOpen(!isMobileSettingsOpen);
+                  setIsOpen(false);
+                  setIsMobileSearchOpen(false);
                 }}
                 className="text-[#131d23] hover:text-[#ff6600] transition-colors"
                 aria-label="Settings"
               >
-                <Bolt size={24} strokeWidth={1.5} />
+                {isMobileSettingsOpen ? <X size={24} /> : <Bolt size={24} strokeWidth={1.5} />}
               </button>
             </div>
 
@@ -731,40 +736,126 @@ export default function Navbar() {
         </div>
       )}
 
-      {/* Mobile Menu Panel */}
+      {/* MOBILE SETTINGS MENU - Styled explicitly to match the clean card format in the reference image */}
+      {isMobileSettingsOpen && user && (
+        <div className="flex md:hidden flex-col gap-4 p-5 mx-4 my-3 bg-white border border-gray-200/80 rounded-2xl shadow-[0_4px_25px_rgba(0,0,0,0.06)] animate-fadeIn">
+          
+          {/* Header Profile Info section */}
+          <div>
+            <h3 className="font-bold font-sans text-xl text-black">
+              {user.fullname || "Orangeflow User"}
+            </h3>
+            <p className="text-sm font-medium text-gray-500 mt-0.5">
+              {user.email}
+            </p>
+          </div>
+
+          <hr className="border-gray-200" />
+
+          {/* List items block */}
+          <div className="flex flex-col gap-4">
+            <Link
+              to="/dashboard"
+              onClick={closeAllDropdowns}
+              className="flex items-center gap-3 font-semibold text-lg text-zinc-800 hover:text-[#ff6600]"
+            >
+              <ChartPie size={20} className="text-zinc-600" />
+              <span>Dashboard</span>
+            </Link>
+
+            <Link
+              to="/support"
+              onClick={closeAllDropdowns}
+              className="flex items-center gap-3 font-semibold text-lg text-zinc-800 hover:text-[#ff6600]"
+            >
+              <Headset size={20} className="text-zinc-600" />
+              <span>Help & Support</span>
+            </Link>
+
+            <div className="flex flex-col">
+              <button
+                onClick={() => setIsMobilePrivacyOpen(!isMobilePrivacyOpen)}
+                className="flex items-center justify-between w-full font-semibold text-lg text-zinc-800 hover:text-[#ff6600]"
+              >
+                <div className="flex items-center gap-3">
+                  <Bolt size={20} className="text-zinc-600" />
+                  <span>Privacy & Security</span>
+                </div>
+                <ChevronRight size={18} className={`text-zinc-500 transition-transform ${isMobilePrivacyOpen ? "rotate-90" : ""}`} />
+              </button>
+
+              {isMobilePrivacyOpen && (
+                <div className="flex flex-col gap-3 ml-2 pl-4 py-2 mt-1 border-gray-200 border-l transition-all">
+                  <Link
+                    to="/edit-profile"
+                    onClick={closeAllDropdowns}
+                    className="flex items-center gap-2 text-sm text-zinc-600 hover:text-[#ff6600]"
+                  >
+                    <UserRoundCog size={16} /> Edit profile
+                  </Link>
+                  <Link
+                    to="/change-password"
+                    onClick={closeAllDropdowns}
+                    className="flex items-center gap-2 text-sm text-zinc-600 hover:text-[#ff6600]"
+                  >
+                    <UserRoundKey size={16} /> Change password
+                  </Link>
+                  <Link
+                    to="/delete-account"
+                    onClick={closeAllDropdowns}
+                    className="flex items-center gap-2 text-red-600 text-sm hover:opacity-85"
+                  >
+                    <UserRoundX size={16} /> Delete account
+                  </Link>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Red Solid Pill Logout Button exactly matching the image */}
+          <button
+            onClick={handleLogout}
+            className="flex items-center justify-center h-12 w-full gap-2 mt-2 font-bold text-base text-white bg-[#e00a0a] hover:bg-red-700 rounded-full shadow-md duration-200 transition-all active:scale-[0.98]"
+          >
+            <LogOut size={18} />
+            <span>Logout</span>
+          </button>
+        </div>
+      )}
+
+      {/* HAMBURGER MENU: Only brings out core navigational links */}
       {isOpen && (
         <div className="flex flex-col md:hidden gap-4 pb-6 pt-4 px-6 bg-white border-t border-gray-100 animate-fadeIn">
-          <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-4 py-2">
             <Link
               to="/"
               onClick={() => setIsOpen(false)}
-              className="py-1 font-sans font-semibold text-[#131d23] hover:text-[#ff6600] duration-200 opacity-80 transition-all hover:opacity-100"
+              className="py-1 font-sans font-semibold text-lg text-[#131d23] hover:text-[#ff6600]"
             >
               Home
             </Link>
 
             {/* Mobile Explore Accordion */}
             <div className="flex flex-col">
-              <Link
-                to="/explore"
-                onClick={() => setIsOpen(false)}
-                className="flex items-center justify-between py-1 font-sans font-semibold text-[#131d23] hover:text-[#ff6600] duration-200 opacity-80 transition-all"
+              <div
+                className="flex items-center justify-between py-1 font-sans font-semibold text-lg text-[#131d23]"
               >
-                <span>Explore</span>
+                <Link to="/explore" onClick={() => setIsOpen(false)} className="hover:text-[#ff6600]">
+                  Explore
+                </Link>
                 <button 
                   onClick={(e) => {
                     e.preventDefault();
-                    e.stopPropagation();
                     setIsMobileExploreOpen(!isMobileExploreOpen);
                   }}
-                  className="p-1"
+                  className="p-1 hover:text-[#ff6600]"
                 >
-                  {isMobileExploreOpen ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
+                  {isMobileExploreOpen ? <ChevronDown size={20} /> : <ChevronRight size={20} />}
                 </button>
-              </Link>
+              </div>
 
               {isMobileExploreOpen && (
-                <div className="grid grid-cols-2 gap-2 ml-2 pl-4 py-2 border-gray-200 border-l max-h-64 overflow-y-auto">
+                <div className="grid grid-cols-2 gap-2 ml-2 pl-4 py-2 mt-1 border-gray-200 border-l max-h-64 overflow-y-auto">
                   {exploreCategories.map((category) => (
                     <Link
                       key={category}
@@ -782,7 +873,7 @@ export default function Navbar() {
             <Link
               to="/about"
               onClick={() => setIsOpen(false)}
-              className="py-1 font-sans font-semibold text-[#131d23] hover:text-[#ff6600] duration-200 opacity-80 transition-all hover:opacity-100"
+              className="py-1 font-sans font-semibold text-lg text-[#131d23] hover:text-[#ff6600]"
             >
               About
             </Link>
@@ -790,121 +881,10 @@ export default function Navbar() {
             <Link
               to="/contact"
               onClick={() => setIsOpen(false)}
-              className="py-1 font-sans font-semibold text-[#131d23] hover:text-[#ff6600] duration-200 opacity-80 transition-all hover:opacity-100"
+              className="py-1 font-sans font-semibold text-lg text-[#131d23] hover:text-[#ff6600]"
             >
               Contact
             </Link>
-          </div>
-
-          <hr className="border-gray-500/20" />
-
-          {/* Mobile Auth Actions */}
-          <div className="flex flex-col gap-3">
-            {user ? (
-              <div className="flex flex-col gap-2 p-4 bg-[#f5f5f5]/40 border border-gray-500/10 rounded-xl">
-                <div className="pb-2 px-1 border-b border-gray-500/20">
-                  <p className="font-bold text-[#131d23] text-base truncate">
-                    {user.fullname || "Orangeflow User"}
-                  </p>
-                  <p className="mt-0.5 text-xs text-zinc-500 truncate">
-                    {user.email}
-                  </p>
-                </div>
-
-                <div className="flex flex-col gap-3 pt-2 font-sans font-semibold text-[#131d23]/90">
-                  <Link
-                    to="/dashboard"
-                    onClick={() => setIsOpen(false)}
-                    className="flex items-center gap-2.5 py-1"
-                  >
-                    <ChartPie size={18} className="text-zinc-600" /> Dashboard
-                  </Link>
-                  
-                  <Link
-                    to="/support"
-                    onClick={() => setIsOpen(false)}
-                    className="flex items-center gap-2.5 py-1"
-                  >
-                    <Headset size={18} className="text-zinc-600" /> Help &
-                    Support
-                  </Link>
-
-                  <div className="flex flex-col gap-2 mt-1">
-                    <button
-                      onClick={() =>
-                        setIsMobilePrivacyOpen(!isMobilePrivacyOpen)
-                      }
-                      className="flex items-center justify-between w-full py-1 font-semibold text-[#131d23]/90 text-base text-left"
-                    >
-                      <div className="flex items-center gap-2.5">
-                        <Bolt size={18} className="text-zinc-600" />
-                        <span>Privacy & Security</span>
-                      </div>
-                      {isMobilePrivacyOpen ? (
-                        <ChevronDown size={18} className="text-zinc-500" />
-                      ) : (
-                        <ChevronRight size={18} className="text-zinc-500" />
-                      )}
-                    </button>
-
-                    {isMobilePrivacyOpen && (
-                      <div className="flex flex-col gap-2.5 ml-2 pl-4 py-1 border-gray-200 border-l transition-all">
-                        <Link
-                          to="/edit-profile"
-                          onClick={closeAllDropdowns}
-                          className="flex items-center gap-2.5 text-sm text-zinc-600 hover:text-[#ff6600]"
-                        >
-                          <UserRoundCog size={16} /> Edit profile
-                        </Link>
-                        <Link
-                          to="/change-password"
-                          onClick={closeAllDropdowns}
-                          className="flex items-center gap-2.5 text-sm text-zinc-600 hover:text-[#ff6600]"
-                        >
-                          <UserRoundKey size={16} /> Change password
-                        </Link>
-                        <Link
-                          to="/delete-account"
-                          onClick={closeAllDropdowns}
-                          className="flex items-center gap-2.5 text-red-600 text-sm hover:opacity-80"
-                        >
-                          <UserRoundX size={16} /> Delete account
-                        </Link>
-                      </div>
-                    )}
-                  </div>
-
-                  <button
-                    onClick={handleLogout}
-                    className="flex items-center justify-center h-11 w-full gap-2 mt-4 font-bold text-sm text-white bg-red-600 rounded-[10px] shadow-sm duration-200 transition-all active:scale-[0.98]"
-                  >
-                    <LogOut size={16} />
-                    Logout
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <>
-                <Link
-                  to="/login"
-                  onClick={() => setIsOpen(false)}
-                  className="w-full"
-                >
-                  <button className="h-12 w-full font-bold text-white bg-[#ff6600] rounded-[10px] shadow-sm duration-200 transition-all hover:opacity-85 active:scale-[0.98]">
-                    Login
-                  </button>
-                </Link>
-                <Link
-                  to="/signup"
-                  onClick={() => setIsOpen(false)}
-                  className="w-full"
-                >
-                  <button className="h-12 w-full font-bold text-white bg-black rounded-[10px] shadow-sm duration-200 transition-all hover:opacity-85 active:scale-[0.98]">
-                    Sign Up
-                  </button>
-                </Link>
-              </>
-            )}
           </div>
         </div>
       )}
