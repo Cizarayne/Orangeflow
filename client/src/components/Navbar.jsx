@@ -104,12 +104,12 @@ function UserIdSearch({ isMobileView = false, onCloseParent }) {
       {showModal &&
         createPortal(
           <div
-            className="fixed inset-0 flex items-start justify-center pt-24 px-5 md:pt-32 bg-black/50 isolate z-[99999] overflow-y-auto"
+            className="fixed inset-0 flex items-start justify-center pt-24 px-5 md:pt-32 bg-black/50 isolate z-99999 overflow-y-auto"
             onClick={closeModal}
             onTouchStart={(e) => e.stopPropagation()}
           >
             <div
-              className="relative max-w-md w-full mb-10 p-6 bg-white rounded-2xl shadow-2xl animate-fadeIn drop-shadow-md z-[100000]"
+              className="relative max-w-md w-full mb-10 p-6 bg-white rounded-2xl shadow-2xl animate-fadeIn drop-shadow-md z-100000"
               onClick={(event) => event.stopPropagation()}
             >
               <button
@@ -339,6 +339,7 @@ export default function Navbar() {
 
   useEffect(() => {
     if (!user) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setLastLogin(null);
       setLoginHistory([]);
       setIsLoadingLastLogin(false);
@@ -476,7 +477,7 @@ export default function Navbar() {
               </Link>
 
               {isExploreOpen && (
-                <div className="absolute left-1/2 -translate-x-1/2 w-[32rem] pt-4 mt-0 z-50 transform transition-all animate-fadeIn">
+                <div className="absolute left-1/2 -translate-x-1/2 w-lg pt-4 mt-0 z-50 transform transition-all animate-fadeIn">
                   <div className="p-4 bg-white border border-gray-100 rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.12)] grid grid-cols-2 gap-1.5">
                     {exploreCategories.map((category) => (
                       <Link
