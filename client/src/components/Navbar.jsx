@@ -29,7 +29,7 @@ import logoImg from "../assets/Orangeflow.png";
 import Loader from "./ui/Loader"; 
 
 /* Expand-on-hover search bar — looks up a user by Flow ID via the public /user/:id endpoint */
-function UserIdSearch({ isMobileView = false, onSearchSuccess }) {
+function UserIdSearch({ isMobileView = false, onCloseParent }) {
   const [query, setQuery] = useState("");
   const [result, setResult] = useState(null);
   const [error, setError] = useState("");
@@ -40,6 +40,7 @@ function UserIdSearch({ isMobileView = false, onSearchSuccess }) {
 
   const handleSearch = async (event) => {
     event.preventDefault();
+    event.stopPropagation();
     const id = query.trim();
     if (!id) return;
 
@@ -51,7 +52,6 @@ function UserIdSearch({ isMobileView = false, onSearchSuccess }) {
     try {
       const data = await getuser(id);
       setResult(data);
-      if (onSearchSuccess) onSearchSuccess();
     } catch (err) {
       setError(err.response?.data?.message || "User not found");
     } finally {
@@ -60,15 +60,23 @@ function UserIdSearch({ isMobileView = false, onSearchSuccess }) {
     }
   };
 
-  const closeModal = () => {
+  const closeModal = (e) => {
+    if (e) e.stopPropagation();
     setShowModal(false);
     setResult(null);
     setError("");
+    // Close the underlying mobile drawer only after the result modal itself is closed
+    if (onCloseParent) onCloseParent();
   };
 
   return (
     <>
-      <form onSubmit={handleSearch} className="w-full md:w-auto">
+      <form 
+        onSubmit={handleSearch} 
+        className="w-full md:w-auto" 
+        onClick={(e) => e.stopPropagation()}
+        onTouchStart={(e) => e.stopPropagation()}
+      >
         <div className={`flex items-center h-10 w-full ${isMobileView ? "bg-[#f5faff] border border-[#BFC9D1] rounded-full" : "md:w-10 md:focus-within:w-64 md:hover:w-64 bg-[#f5faff] border border-[#BFC9D1] rounded-full duration-300 ease-out transition-all overflow-hidden"}`}>
           <span className="flex items-center justify-center h-10 w-10 text-[#131d23] shrink-0">
             <Search size={18} />
@@ -90,16 +98,17 @@ function UserIdSearch({ isMobileView = false, onSearchSuccess }) {
         </div>
       </form>
 
-      {/* Result Modal */}
+      {/* Result Modal - Isolated globally via Portals to prevent parent dashboard blur bugs */}
       {showModal &&
         createPortal(
           <div
-            className="fixed flex items-start justify-center pt-24 px-5 md:pt-32 bg-black/40 backdrop-blur-sm inset-0 overflow-y-auto z-9999"
+            className="fixed inset-0 flex items-start justify-center pt-24 px-5 md:pt-32 bg-black/50 isolate z-[99999] overflow-y-auto"
             onClick={closeModal}
+            onTouchStart={(e) => e.stopPropagation()}
           >
             <div
-              className="relative max-w-md w-full mb-10 p-6 bg-white rounded-2xl shadow-2xl animate-fadeIn drop-shadow-md"
-              onClick={(event) => event.stopPropagation()}
+              className="relative max-w-md w-full mb-10 p-6 bg-white rounded-2xl shadow-2xl animate-fadeIn drop-shadow-md z-[100000]"
+              onClick={(event) => event.stopPropagation()} 
             >
               <button
                 onClick={closeModal}
@@ -751,8 +760,13 @@ export default function Navbar() {
 
       {/* MOBILE EXPANDABLE SEARCH DRAWER */}
       {isMobileSearchOpen && (
-        <div className="md:hidden w-full pb-4 px-4 bg-white border-b border-gray-100 animate-fadeIn">
-          <UserIdSearch isMobileView={true} onSearchSuccess={() => setIsMobileSearchOpen(false)} />
+        <div 
+          className="md:hidden w-full pb-4 px-4 bg-white border-b border-gray-100 animate-fadeIn"
+          onClick={(e) => e.stopPropagation()} 
+          onTouchStart={(e) => e.stopPropagation()} 
+        >
+          {/* FIXED: We pass the onCloseParent callback to avoid search input disappearing immediately on submit */}
+          <UserIdSearch isMobileView={true} onCloseParent={() => setIsMobileSearchOpen(false)} />
         </div>
       )}
 
@@ -805,7 +819,7 @@ export default function Navbar() {
         </div>
       )}
 
-      {/* MOBILE SETTINGS MENU - Styled explicitly to match the clean card format in the reference image */}
+      {/* MOBILE SETTINGS MENU */}
       {isMobileSettingsOpen && user && (
         <div className="flex md:hidden flex-col gap-4 p-5 mx-4 my-3 bg-white border border-gray-200/80 rounded-2xl shadow-[0_4px_25px_rgba(0,0,0,0.06)] animate-fadeIn">
           
@@ -881,7 +895,7 @@ export default function Navbar() {
             </div>
           </div>
 
-          {/* Red Solid Pill Logout Button exactly matching the image */}
+          {/* Red Solid Pill Logout Button */}
           <button
             onClick={handleLogout}
             className="flex items-center justify-center h-12 w-full gap-2 mt-2 font-bold text-base text-white bg-[#e00a0a] hover:bg-red-700 rounded-full shadow-md duration-200 transition-all active:scale-[0.98]"
@@ -892,9 +906,14 @@ export default function Navbar() {
         </div>
       )}
 
-      {/* HAMBURGER MENU: Only brings out core navigational links */}
+      {/* HAMBURGER MENU */}
       {isOpen && (
         <div className="flex flex-col md:hidden gap-4 pb-6 pt-4 px-6 bg-white border-t border-gray-100 animate-fadeIn">
+          <div className="pb-2">
+            {/* FIXED: Passing onCloseParent to avoid search component closing prematurely on submit */}
+            <UserIdSearch isMobileView={true} onCloseParent={() => setIsOpen(false)} />
+          </div>
+
           <div className="flex flex-col gap-4 py-2">
             <Link
               to="/"
