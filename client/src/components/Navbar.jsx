@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { createPortal } from "react-dom"; 
+import { createPortal } from "react-dom";
 import { Link, useNavigate } from "react-router-dom";
 import {
   Menu,
@@ -25,8 +25,8 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { AuthContext } from "../store/Auth";
-import logoImg from "../assets/Orangeflow.png"; 
-import Loader from "./ui/Loader"; 
+import logoImg from "../assets/Orangeflow.png";
+import Loader from "./ui/Loader";
 
 /* Expand-on-hover search bar — looks up a user by Flow ID via the public /user/:id endpoint */
 function UserIdSearch({ isMobileView = false, onCloseParent }) {
@@ -56,7 +56,7 @@ function UserIdSearch({ isMobileView = false, onCloseParent }) {
       setError(err.response?.data?.message || "User not found");
     } finally {
       setLoading(false);
-      setQuery(""); 
+      setQuery("");
     }
   };
 
@@ -71,13 +71,15 @@ function UserIdSearch({ isMobileView = false, onCloseParent }) {
 
   return (
     <>
-      <form 
-        onSubmit={handleSearch} 
-        className="w-full md:w-auto" 
+      <form
+        onSubmit={handleSearch}
+        className="w-full md:w-auto"
         onClick={(e) => e.stopPropagation()}
         onTouchStart={(e) => e.stopPropagation()}
       >
-        <div className={`flex items-center h-10 w-full ${isMobileView ? "bg-[#f5faff] border border-[#BFC9D1] rounded-full" : "md:w-10 md:focus-within:w-64 md:hover:w-64 bg-[#f5faff] border border-[#BFC9D1] rounded-full duration-300 ease-out transition-all overflow-hidden"}`}>
+        <div
+          className={`flex items-center h-10 w-full ${isMobileView ? "bg-[#f5faff] border border-[#BFC9D1] rounded-full" : "md:w-10 md:focus-within:w-64 md:hover:w-64 bg-[#f5faff] border border-[#BFC9D1] rounded-full duration-300 ease-out transition-all overflow-hidden"}`}
+        >
           <span className="flex items-center justify-center h-10 w-10 text-[#131d23] shrink-0">
             <Search size={18} />
           </span>
@@ -108,7 +110,7 @@ function UserIdSearch({ isMobileView = false, onCloseParent }) {
           >
             <div
               className="relative max-w-md w-full mb-10 p-6 bg-white rounded-2xl shadow-2xl animate-fadeIn drop-shadow-md z-[100000]"
-              onClick={(event) => event.stopPropagation()} 
+              onClick={(event) => event.stopPropagation()}
             >
               <button
                 onClick={closeModal}
@@ -261,14 +263,15 @@ function getOrdinalSuffix(day) {
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [isExploreOpen, setIsExploreOpen] = useState(false); 
-  const [isMobileExploreOpen, setIsMobileExploreOpen] = useState(false); 
+  const [isExploreOpen, setIsExploreOpen] = useState(false);
+  const [isMobileExploreOpen, setIsMobileExploreOpen] = useState(false);
   const [isPrivacyOpen, setIsPrivacyOpen] = useState(false);
-  const [isMobilePrivacyOpen, setIsMobilePrivacyOpen] = useState(false); 
+  const [isMobilePrivacyOpen, setIsMobilePrivacyOpen] = useState(false);
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
   const [isMobileSettingsOpen, setIsMobileSettingsOpen] = useState(false);
-  const [isMobileNotificationsOpen, setIsMobileNotificationsOpen] = useState(false);
-  
+  const [isMobileNotificationsOpen, setIsMobileNotificationsOpen] =
+    useState(false);
+
   const dropdownRef = useRef(null);
   const exploreRef = useRef(null);
   const notificationRef = useRef(null);
@@ -335,7 +338,14 @@ export default function Navbar() {
   }, []);
 
   useEffect(() => {
-    if (!user) return;
+    if (!user) {
+      setLastLogin(null);
+      setLoginHistory([]);
+      setIsLoadingLastLogin(false);
+      return;
+    }
+
+    let isMounted = true;
 
     const fetchLoginData = async () => {
       try {
@@ -344,16 +354,26 @@ export default function Navbar() {
           getLastLogin(),
           getLoginHistory(),
         ]);
+
+        if (!isMounted) return;
+
         setLastLogin(lastLoginValue);
         setLoginHistory(historyValue || []);
       } catch (err) {
+        if (!isMounted) return;
         console.log(err.message);
       } finally {
-        setIsLoadingLastLogin(false);
+        if (isMounted) {
+          setIsLoadingLastLogin(false);
+        }
       }
     };
 
     fetchLoginData();
+
+    return () => {
+      isMounted = false;
+    };
   }, [user, getLastLogin, getLoginHistory]);
 
   const closeAllDropdowns = () => {
@@ -376,14 +396,13 @@ export default function Navbar() {
   const handleMouseLeaveExplore = () => {
     leaveTimeoutRef.current = setTimeout(() => {
       setIsExploreOpen(false);
-    }, 150); 
+    }, 150);
   };
 
   return (
     <nav className="relative md:sticky w-full md:max-w-[92%] xl:max-w-7xl mx-auto my-0 md:my-6 text-[#131d23] bg-white border-b border-gray-200 md:border md:border-gray-100/50 rounded-none md:rounded-[50px] shadow-none md:shadow-[0_0_50px_rgba(0,0,0,0.12)] duration-300 transition-all backdrop-blur-md left-0 right-0 md:ring-1 md:ring-black/5 top-0 md:top-6 z-50">
       <div className="w-full px-4 md:px-10 sm:px-8">
         <div className="flex items-center justify-between h-16 md:h-20">
-          
           {/* MOBILE LEFT BLOCK: Hamburger & Search triggers */}
           <div className="flex items-center gap-4 md:hidden">
             <button
@@ -414,7 +433,11 @@ export default function Navbar() {
 
           {/* CENTER LOGO BLOCK (Always Centered on Mobile, Left-aligned on Desktop) */}
           <div className="absolute left-1/2 -translate-x-1/2 md:static md:translate-x-0 flex items-center shrink-0">
-            <Link to="/" className="flex items-center" onClick={closeAllDropdowns}>
+            <Link
+              to="/"
+              className="flex items-center"
+              onClick={closeAllDropdowns}
+            >
               <img
                 src={logoImg}
                 alt="Orangeflow Logo"
@@ -434,8 +457,8 @@ export default function Navbar() {
             </Link>
 
             {/* Explore dropdown */}
-            <div 
-              className="relative" 
+            <div
+              className="relative"
               ref={exploreRef}
               onMouseEnter={handleMouseEnterExplore}
               onMouseLeave={handleMouseLeaveExplore}
@@ -446,7 +469,10 @@ export default function Navbar() {
                 className="flex items-center gap-1 relative py-2 font-sans font-semibold text-[#131d23] text-base hover:text-[#ff6600] duration-300 opacity-80 transition-all hover:opacity-100 focus:outline-none"
               >
                 <span>Explore</span>
-                <ChevronDown size={16} className={`transition-transform duration-200 ${isExploreOpen ? "rotate-180" : ""}`} />
+                <ChevronDown
+                  size={16}
+                  className={`transition-transform duration-200 ${isExploreOpen ? "rotate-180" : ""}`}
+                />
               </Link>
 
               {isExploreOpen && (
@@ -486,7 +512,6 @@ export default function Navbar() {
 
           {/* RIGHT SIDE ACTIONS: Desktop vs Mobile Profile & Navigation Settings */}
           <div className="flex items-center gap-4">
-            
             {/* Desktop Only Search & Actions */}
             <div className="hidden md:flex items-center gap-4">
               <UserIdSearch />
@@ -750,23 +775,29 @@ export default function Navbar() {
                 className="text-[#131d23] hover:text-[#ff6600] transition-colors"
                 aria-label="Settings"
               >
-                {isMobileSettingsOpen ? <X size={24} /> : <Bolt size={24} strokeWidth={1.5} />}
+                {isMobileSettingsOpen ? (
+                  <X size={24} />
+                ) : (
+                  <Bolt size={24} strokeWidth={1.5} />
+                )}
               </button>
             </div>
-
           </div>
         </div>
       </div>
 
       {/* MOBILE EXPANDABLE SEARCH DRAWER */}
       {isMobileSearchOpen && (
-        <div 
+        <div
           className="md:hidden w-full pb-4 px-4 bg-white border-b border-gray-100 animate-fadeIn"
-          onClick={(e) => e.stopPropagation()} 
-          onTouchStart={(e) => e.stopPropagation()} 
+          onClick={(e) => e.stopPropagation()}
+          onTouchStart={(e) => e.stopPropagation()}
         >
           {/* FIXED: We pass the onCloseParent callback to avoid search input disappearing immediately on submit */}
-          <UserIdSearch isMobileView={true} onCloseParent={() => setIsMobileSearchOpen(false)} />
+          <UserIdSearch
+            isMobileView={true}
+            onCloseParent={() => setIsMobileSearchOpen(false)}
+          />
         </div>
       )}
 
@@ -822,7 +853,6 @@ export default function Navbar() {
       {/* MOBILE SETTINGS MENU */}
       {isMobileSettingsOpen && user && (
         <div className="flex md:hidden flex-col gap-4 p-5 mx-4 my-3 bg-white border border-gray-200/80 rounded-2xl shadow-[0_4px_25px_rgba(0,0,0,0.06)] animate-fadeIn">
-          
           {/* Header Profile Info section */}
           <div>
             <h3 className="font-bold font-sans text-xl text-black">
@@ -864,7 +894,10 @@ export default function Navbar() {
                   <Bolt size={20} className="text-zinc-600" />
                   <span>Privacy & Security</span>
                 </div>
-                <ChevronRight size={18} className={`text-zinc-500 transition-transform ${isMobilePrivacyOpen ? "rotate-90" : ""}`} />
+                <ChevronRight
+                  size={18}
+                  className={`text-zinc-500 transition-transform ${isMobilePrivacyOpen ? "rotate-90" : ""}`}
+                />
               </button>
 
               {isMobilePrivacyOpen && (
@@ -911,7 +944,10 @@ export default function Navbar() {
         <div className="flex flex-col md:hidden gap-4 pb-6 pt-4 px-6 bg-white border-t border-gray-100 animate-fadeIn">
           <div className="pb-2">
             {/* FIXED: Passing onCloseParent to avoid search component closing prematurely on submit */}
-            <UserIdSearch isMobileView={true} onCloseParent={() => setIsOpen(false)} />
+            <UserIdSearch
+              isMobileView={true}
+              onCloseParent={() => setIsOpen(false)}
+            />
           </div>
 
           <div className="flex flex-col gap-4 py-2">
@@ -925,20 +961,26 @@ export default function Navbar() {
 
             {/* Mobile Explore Accordion */}
             <div className="flex flex-col">
-              <div
-                className="flex items-center justify-between py-1 font-sans font-semibold text-lg text-[#131d23]"
-              >
-                <Link to="/explore" onClick={() => setIsOpen(false)} className="hover:text-[#ff6600]">
+              <div className="flex items-center justify-between py-1 font-sans font-semibold text-lg text-[#131d23]">
+                <Link
+                  to="/explore"
+                  onClick={() => setIsOpen(false)}
+                  className="hover:text-[#ff6600]"
+                >
                   Explore
                 </Link>
-                <button 
+                <button
                   onClick={(e) => {
                     e.preventDefault();
                     setIsMobileExploreOpen(!isMobileExploreOpen);
                   }}
                   className="p-1 hover:text-[#ff6600]"
                 >
-                  {isMobileExploreOpen ? <ChevronDown size={20} /> : <ChevronRight size={20} />}
+                  {isMobileExploreOpen ? (
+                    <ChevronDown size={20} />
+                  ) : (
+                    <ChevronRight size={20} />
+                  )}
                 </button>
               </div>
 

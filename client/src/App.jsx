@@ -38,22 +38,36 @@ import { AuthContext } from "./store/Auth";
 import Loader from "./components/ui/Loader";
 
 export default function App() {
-  const { profile } = AuthContext();
+  const { profile, isLoggedIn } = AuthContext();
   const [checkingAuth, setCheckingAuth] = useState(true);
 
   useEffect(() => {
     const restoreSession = async () => {
+      if (!isLoggedIn) {
+        setCheckingAuth(false);
+        return;
+      }
+
       try {
         await profile();
       } catch (error) {
-        console.log("profile error", error);
-        toast.error("Session expired, please login again");
+        const status = error?.response?.status;
+        const message = error?.response?.data?.message;
+
+        if (
+          status === 401 ||
+          message === "Please login first to execute this action"
+        ) {
+          console.log("profile error", error);
+        } else {
+          console.log("profile error", error);
+        }
       } finally {
         setCheckingAuth(false);
       }
     };
     restoreSession();
-  }, [profile]);
+  }, [profile, isLoggedIn]);
 
   if (checkingAuth) {
     return (
