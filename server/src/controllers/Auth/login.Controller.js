@@ -41,7 +41,7 @@ export const login = async (req, res) => {
       });
     }
 
-    // Record this login before generating the token
+    
     const userAgent = req.headers["user-agent"] || null;
 
     exist.lastLogin = new Date();
@@ -50,10 +50,10 @@ export const login = async (req, res) => {
       timestamp: new Date(),
       userAgent,
     });
-    exist.loginHistory = exist.loginHistory.slice(0, 10); // keep only the last 10
+    exist.loginHistory = exist.loginHistory.slice(0, 10); 
     await exist.save();
 
-    // Sets httpOnly cookie
+    
     const token = await sendTokenResponse(exist._id, exist.email, res);
 
     const response = await User.findById(exist._id).select(

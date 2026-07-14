@@ -1,16 +1,56 @@
 import { create } from "zustand";
 import { connector } from "../api/Axios";
 
+const STORAGE_KEY = "orangeflow-auth";
+
+const readStoredAuth = () => {
+  if (typeof window === "undefined") {
+    return { isLoggedIn: false, user: null };
+  }
+
+  try {
+    const stored = window.localStorage.getItem(STORAGE_KEY);
+    if (!stored) return { isLoggedIn: false, user: null };
+
+    const parsed = JSON.parse(stored);
+    return {
+      isLoggedIn: Boolean(parsed?.isLoggedIn),
+      user: parsed?.user ?? null,
+    };
+  } catch {
+    return { isLoggedIn: false, user: null };
+  }
+};
+
+const persistAuth = (state) => {
+  if (typeof window === "undefined") return;
+
+  window.localStorage.setItem(
+    STORAGE_KEY,
+    JSON.stringify({
+      isLoggedIn: state.isLoggedIn,
+      user: state.user,
+    }),
+  );
+};
+
+const clearStoredAuth = () => {
+  if (typeof window === "undefined") return;
+  window.localStorage.removeItem(STORAGE_KEY);
+};
+
 export const AuthContext = create((set) => ({
-  user: null,
-  isLoggedIn: false,
+  user: readStoredAuth().user,
+  isLoggedIn: readStoredAuth().isLoggedIn,
   token: null,
   setUserToken: (token) => set({ token }),
 
   signup: async (data) => {
     try {
       const response = await connector.post("/auth/signup", data);
-      set({ user: response.data.data, isLoggedIn: true });
+      const nextState = { user: response.data.data, isLoggedIn: true };
+      set(nextState);
+      persistAuth(nextState);
       return response.data;
     } catch (error) {
       console.log("signup error", error);
@@ -21,7 +61,9 @@ export const AuthContext = create((set) => ({
   login: async (data) => {
     try {
       const response = await connector.post("/auth/login", data);
-      set({ user: response.data.data, isLoggedIn: true });
+      const nextState = { user: response.data.data, isLoggedIn: true };
+      set(nextState);
+      persistAuth(nextState);
       return response.data;
     } catch (error) {
       console.log("login error", error);
@@ -32,7 +74,9 @@ export const AuthContext = create((set) => ({
   logout: async () => {
     try {
       const response = await connector.post("/auth/logout");
-      set({ user: null, isLoggedIn: false });
+      const nextState = { user: null, isLoggedIn: false };
+      set(nextState);
+      clearStoredAuth();
       return response.data;
     } catch (error) {
       console.log("logout error", error);
@@ -54,7 +98,9 @@ export const AuthContext = create((set) => ({
   profile: async () => {
     try {
       const response = await connector.get("/auth/profile");
-      set({ user: response.data.data, isLoggedIn: true });
+      const nextState = { user: response.data.data, isLoggedIn: true };
+      set(nextState);
+      persistAuth(nextState);
       return response.data.data;
     } catch (error) {
       console.log("profile error", error);
@@ -88,14 +134,16 @@ export const AuthContext = create((set) => ({
       const response = await connector.delete("/auth/delete", {
         data: { password },
       });
-      set({ user: null, isLoggedIn: false });
+      const nextState = { user: null, isLoggedIn: false };
+      set(nextState);
+      clearStoredAuth();
       return response.data;
     } catch (error) {
       console.log("delete error", error);
       throw error;
     }
   },
-  
+
   getLastLogin: async () => {
     try {
       const response = await connector.get("/user/last-login");
