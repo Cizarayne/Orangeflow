@@ -7,8 +7,28 @@ dotenv.config();
 import route from "./routes/routes.js";
 import connectDatabase from "./configs/database.js";
 
+const allowedOrigins = (process.env.CORS_ORIGIN || "http://localhost:5173")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
 const corsOptions = {
-  origin: process.env.CORS_ORIGIN || "http://localhost:5173",
+  origin: (origin, callback) => {
+    if (!origin) {
+      return callback(null, true);
+    }
+
+    const normalizedOrigin = origin.replace(/\/+$/, "");
+    const normalizedAllowedOrigins = allowedOrigins.map((allowedOrigin) =>
+      allowedOrigin.replace(/\/+$/, ""),
+    );
+
+    if (normalizedAllowedOrigins.includes(normalizedOrigin)) {
+      return callback(null, true);
+    }
+
+    return callback(new Error("Not allowed by CORS"));
+  },
   credentials: true,
   methods: "GET, POST, PUT, DELETE, PATCH, OPTIONS",
   allowedHeaders: "Content-Type, Authorization",
@@ -28,13 +48,15 @@ app.use(async (req, res, next) => {
       isConnected = true;
     } catch (error) {
       console.error("Database connection failed:", error.message);
-      return res.status(500).json({ success: false, message: "Database connection failed" });
+      return res
+        .status(500)
+        .json({ success: false, message: "Database connection failed" });
     }
   }
   next();
 });
 
-app.use("/api", route); 
+app.use("/api", route);
 
 if (process.env.NODE_ENV === "development") {
   const PORT = process.env.PORT || 8000;
