@@ -10,6 +10,7 @@ Orangeflow combines a rich learning experience with secure authentication and a 
 
 - Search users in the database with id(Search by flow id on the search icon on the navbar)
 - Report issues notification goes to a discord webhook 
+- Users can login with email, phone or username
 
 ### 1. User Authentication
 
@@ -113,7 +114,6 @@ Orangeflow combines a rich learning experience with secure authentication and a 
 
 ### Run the frontend
 
-```bash
 cd client
 npm install
 npm run dev
@@ -121,7 +121,6 @@ npm run dev
 
 ### Run the backend
 
-```bash
 cd server
 npm install
 npm run dev
